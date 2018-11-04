@@ -1,0 +1,38 @@
+---
+title: "p8105_hw5_ph2538"
+Author: "Pei Yang Hsieh"
+Date: 2018-11-04
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+
+## Problem 1
+
+Create a tidy dataframe containing data from all participants, including the subject ID, arm, and observations over time
+
+
+```{r}
+#Start with a dataframe containing all file names; the list.files function will help
+
+participant_data = data_frame(list.files(path = "./data_1"))
+
+participant_data
+
+#Iterate over file names and read in data for each subject using purrr::map and saving the result as a new variable in the dataframe
+
+
+
+```
+
+
+## Problem 2
+
+
+```{r}
+
+```
+
