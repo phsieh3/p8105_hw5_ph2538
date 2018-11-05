@@ -18,13 +18,35 @@ Create a tidy dataframe containing data from all participants, including the sub
 ```{r}
 #Start with a dataframe containing all file names; the list.files function will help
 
-participant_data = data_frame(list.files(path = "./data_1"))
+file_names = data_frame(file_names = list.files(path = "./data_1"))
 
-participant_data
+file_names[1]
+
+participant_1 = read_csv("./data_1/con_01.csv")
 
 #Iterate over file names and read in data for each subject using purrr::map and saving the result as a new variable in the dataframe
 
+#write function to read in csv files
 
+paste0('"',file_names[1,1],'"')
+
+read_csv(paste0("data_1/", as.character(file_names[1,1])))
+
+read_participant_data <- function(file_name) {
+  
+ read_csv(paste0("data_1/", as.character(file_name))) 
+
+}
+
+read_participant_data(file_names[1,1])
+
+#map requires dataset and function
+
+participant_data = map_df(file_names$file_names, read_participant_data)
+
+#Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
+
+cbind(file_names, participant_data)
 
 ```
 
