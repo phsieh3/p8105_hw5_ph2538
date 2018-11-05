@@ -38,9 +38,40 @@ participant_data = map_df(file_names$subID_arm, read_participant_data)
 
 #Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
 
-tidy_participant_data = cbind(file_names, participant_data)
+tidy_participant_data = 
+  cbind(file_names, participant_data) %>% 
+  janitor::clean_names() %>% 
+  mutate(sub_id_arm = str_replace(sub_id_arm, ".csv", "")) %>% 
+  separate(sub_id_arm, into = c("arm", "sub_id"), sep = "_") %>% 
+  gather(key = week, value = obs, week_1:week_8) %>% 
+  mutate(week = str_replace(week, "week_", "")) %>% 
+  mutate(week = as.numeric(week))
 
 ```
+
+### Spaghetti plot
+
+```{r}
+#Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.
+
+tidy_participant_data %>% 
+  ggplot(aes(x = week, y = obs, color = sub_id)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(~arm) + 
+  labs(
+    title = "Control vs Experimental Arms, Week 1-8",
+    x = "Week",
+    y = "Observations"
+  )
+
+```
+
+
+
+The spaghetti plot shows that observations for the experimental arm have much higher values compared to the observations for the control arm. The control arm values consistently remain at low values, while the experimental values have a positive increasing trend.
+
+
 
 
 ## Problem 2
