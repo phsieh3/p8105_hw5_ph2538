@@ -120,23 +120,40 @@ unsolved_homicide =
 Baltimore = 
   inner_join(total_homicide, unsolved_homicide, by = "city_state")
 
-Prop_test_table =
+Prop_test_baltimore =
   prop.test(Baltimore$unsolved, Baltimore$total) %>% 
   broom::tidy() %>% 
-  select(estimate, conf.low, conf.high)
+  select(estimate, conf.low, conf.high) %>% 
+  knitr::kable(digits = 4)
   
-  
-Prop_test_table$estimate 
-Prop_test_table$conf.low
-Prop_test_table$conf.high
+Prop_test_baltimore
 
 ```
 
+### prop.test on all cities
 
-Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
 
 ```{r}
+#Now run prop.test for each of the cities in your dataset, and extract both the proportion of unsolved homicides and the confidence interval for each. Do this within a “tidy” pipeline, making use of purrr::map, purrr::map2, list columns and unnest as necessary to create a tidy dataframe with estimated proportions and CIs for each city.
 
-#output = map2(.x = input_1, .y = input_2, ~func(arg_1 = .x, arg_2 = .y))
+total_homicide =
+  homicide_data %>% 
+  group_by(city_state) %>% 
+  summarize(total = n())
+
+unsolved_homicide =
+  homicide_data %>%
+  filter(disposition == "Closed without arrest" | disposition == "Open/No arrest") %>% 
+  group_by(city_state) %>% 
+  summarize(unsolved = n())
+
+All_cities = 
+  inner_join(total_homicide, unsolved_homicide, by = "city_state") 
+  
+prop_test_allcities = 
+  All_cities %>% 
+  mutate(output = map2(.x = unsolved, .y = total, ~prop.test(.x, .y)))
+  #unnest()
+
 ```
 
