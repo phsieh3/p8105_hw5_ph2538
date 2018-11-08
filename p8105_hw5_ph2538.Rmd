@@ -38,6 +38,8 @@ participant_data = map_df(file_names$subID_arm, read_participant_data)
 
 #Tidy the result; manipulate file names to include control arm and subject ID, make sure weekly observations are “tidy”, and do any other tidying that’s necessary
 
+#file_names_df %>% mutate(study_data = map....) %>% unnest
+
 tidy_participant_data = 
   cbind(file_names, participant_data) %>% 
   janitor::clean_names() %>% 
@@ -149,11 +151,23 @@ unsolved_homicide =
 
 All_cities = 
   inner_join(total_homicide, unsolved_homicide, by = "city_state") 
-  
-prop_test_allcities = 
-  All_cities %>% 
-  mutate(output = map2(.x = unsolved, .y = total, ~prop.test(.x, .y)))
-  #unnest()
 
+prop_city <- function(total.prop, unsolved.prop) {
+  
+ result = broom::tidy(prop.test(total.prop, unsolved.prop))
+ tibble(
+   estimate = result %>% pull(estimate),
+   conf_low = result %>% pull(conf.low), 
+   conf_high = result %>% pull(conf.high)
+ )
+
+}
+
+All_cities %>% 
+  mutate(prop_city = map2(unsolved, total, prop_city)) %>% 
+  unnest()
 ```
+
+
+Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.
 
