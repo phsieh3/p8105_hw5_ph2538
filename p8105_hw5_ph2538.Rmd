@@ -152,26 +152,25 @@ unsolved_homicide =
 All_cities = 
   inner_join(total_homicide, unsolved_homicide, by = "city_state") 
 
-prop_city <- function(total.prop, unsolved.prop) {
-  
- result = broom::tidy(prop.test(total.prop, unsolved.prop))
- tibble(
-   estimate = result %>% pull(estimate),
-   conf_low = result %>% pull(conf.low), 
-   conf_high = result %>% pull(conf.high)
- )
+```
 
+Note that the following prop_test analyses and plot omits the outlier Tulsa, Alabama, which only has 1 homicide.
+
+```{r}
+prop_city <- function(unsolved_prop, total_prop) {
+  
+  prop.test(unsolved_prop, total_prop) %>% 
+  broom::tidy() %>% 
+  select(estimate, conf.low, conf.high)
 }
 
-All_cities =
+Prop_all_cities =
   All_cities %>% 
   mutate(prop_city = map2(unsolved, total, prop_city)) %>% 
   unnest()
 
-All_cities
-
+Prop_all_cities
 ```
-
 
 
 ### Plot estimates and CI's for all cities
@@ -180,10 +179,10 @@ All_cities
 #Create a plot that shows the estimates and CIs for each city – check out geom_errorbar for a way to add error bars based on the upper and lower limits. Organize cities according to the proportion of unsolved homicides.
 
 Plot_all_cities =
-  All_cities %>% 
+  Prop_all_cities %>% 
   ggplot(aes(fct_reorder(city_state, estimate), estimate)) +
   geom_point() +
-  geom_errorbar(aes(ymin = conf_low, ymax = conf_high)) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
   labs(
     title = "Estimates and CIs for All Cities",
     x = "City",
